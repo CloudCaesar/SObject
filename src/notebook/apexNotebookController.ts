@@ -178,11 +178,6 @@ export default class NotebookController {
         if(pRecords && pRecords.length > 0) {
             //Grab headers
             let headers = Object.keys(pRecords[0]).filter(pKey => pKey != 'attributes');
-            if(headers.includes('Id')) {
-                //Place Id at the beginning of the
-                headers.splice(headers.indexOf('Id'), 1);
-                headers = ['Id', ...headers];
-            }
             rows.push(headers);
             //Process records
             rows.push(
