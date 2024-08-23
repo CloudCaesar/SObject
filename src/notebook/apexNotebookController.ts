@@ -177,7 +177,7 @@ export default class NotebookController {
         let rows: string[][] = [];
         if(pRecords && pRecords.length > 0) {
             //Grab headers
-            let headers = Object.keys(pRecords[0]).filter(pKey => pKey != 'attributes').sort();
+            let headers = Object.keys(pRecords[0]).filter(pKey => pKey != 'attributes');
             if(headers.includes('Id')) {
                 //Place Id at the beginning of the
                 headers.splice(headers.indexOf('Id'), 1);
