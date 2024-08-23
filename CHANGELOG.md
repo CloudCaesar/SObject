@@ -2,6 +2,11 @@
 
 All notable changes to the "anonymous-apex-notebook" extension will be documented in this file.
 
+## 0.5.1
+
+- Fixed issue where SOQL results are not sorted by the order of the query
+  - Resulting from https://github.com/jake-kirkman/vscode-ext-apex-notebook/issues/4
+
 ## 0.5.0
 
 - Added Debug Only view courtesy of [Agisole](https://github.com/agilsole)
