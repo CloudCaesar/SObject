@@ -22,7 +22,7 @@ export async function getSalesforceConnection(pUsernameOrAlias?: string) {
     return await DataHandler.getLocalWithQueue<sfdc_core.Connection>(
         CONSTANTS.STORAGE_KEY_APEX_EXECUTE_SERVICE + pUsernameOrAlias,
         async () => {
-            return getConnectionForUsername(pUsernameOrAlias);
+            return getConnectionForUsername(pUsernameOrAlias!);
         }
     );
 } 
