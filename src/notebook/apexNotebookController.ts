@@ -42,6 +42,41 @@ export default class NotebookController {
         _notebook: vscode.NotebookDocument,
         _controller: vscode.NotebookController
     ) {
+        //Check for org availability
+        let targetUsername = await SalesforceHandler.getDefaultUsernameOrAlias();
+        const promptTargetOrgConfig = vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_PROMPT_FOR_TARGET_ORG);
+        if(promptTargetOrgConfig === CONSTANTS.TARGET_ORG_DIALOG_OPTION_ALWAYS_PROMPT) {
+            //Grab list of aliases
+            const options: vscode.QuickPickItem[] = [];
+            //Push default username to top
+            const defaultUsername = targetUsername;
+            options.push({
+                label: defaultUsername,
+                detail: '(Default Username)'
+            });
+            //Add list of aliases
+            const aliasMap = await SalesforceHandler.getListOfUsernames();
+            for(const alias of Object.keys(aliasMap).sort()) {
+                if(alias === defaultUsername) {
+                    continue;
+                }
+                options.push({
+                    label: alias,
+                    detail: aliasMap[alias]
+                });
+            }
+            //Push cancel option
+            options.push({label: 'Cancel'});
+            //Show prompt
+            let answer = await vscode.window.showQuickPick(options, {
+                title: `Which org would you like to execute the selected cells in?`
+            });
+            if(undefined === answer || answer.label === 'Cancel') {
+                return; //Stop processing cells
+            } else {
+                targetUsername = answer.label;
+            }
+        }
         //Check for confirmation dialog
         let cellsToProcess = [...cells];
         if(cells.some(pCell => pCell.document.languageId == 'apex-anon')) {
@@ -70,7 +105,7 @@ export default class NotebookController {
                 options.push('Cancel');
                 //Show quick pick
                 let answer = await vscode.window.showQuickPick(options, {
-                    title: `Are you sure you want to execute ${amountOfApexCells} anonymous apex cell(s)?`
+                    title: `Are you sure you want to execute ${amountOfApexCells} anonymous apex cell(s) for target org ${targetUsername}?`
                 });
                 //If answer wasn't selected or cancel was pressed, exit.
                 //If answer was Execute only SOQLs, then filter out anything except SOQLs
@@ -86,12 +121,13 @@ export default class NotebookController {
         }
         //Run execute
         for(let cell of cellsToProcess) {
-            this._doExecution(cell);
+            this._doExecution(cell, targetUsername);
         }
     }
 
     async _doExecution(
-        cell: vscode.NotebookCell
+        cell: vscode.NotebookCell,
+        targetUsername?: string
     ) {
         let executionTask = this._controller.createNotebookCellExecution(cell);
         executionTask.start(Date.now());
@@ -100,7 +136,7 @@ export default class NotebookController {
         try {
             //Grab via queue option so if multiple apex scripts are running, we only initialise
             //the service and related config once
-            let connection = await SalesforceHandler.getSalesforceConnection();
+            let connection = await SalesforceHandler.getSalesforceConnection(targetUsername);
             //Switch depending on type
             switch(cell.document.languageId) {
                 case 'apex-anon':

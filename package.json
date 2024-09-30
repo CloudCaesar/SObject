@@ -60,6 +60,16 @@
           "description": "Should Anon Apex cells show an additional \"Debug Only\" output?",
           "default": true,
           "order": 0
+        },
+        "anonymous-apex-notebook.promptForTargetOrgWhenExecutingCells": {
+          "type": "string",
+          "description": "When executing cells, prompt for a target org?",
+          "default": "Never prompt, always use default org",
+          "order": 0,
+          "enum": [
+            "Always prompt",
+            "Never prompt, always use default org"
+          ]
         }
       }
     },
