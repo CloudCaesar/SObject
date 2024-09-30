@@ -2,6 +2,13 @@
 
 All notable changes to the "anonymous-apex-notebook" extension will be documented in this file.
 
+## 0.6.0
+
+- Added new config `anonymous-apex-notebook.promptForTargetOrgWhenExecutingCells` to give users the ability to switch orgs before executing cells
+  - Two options - always use default, or prompt before executing
+- Added the target org name when executing apex in the confirmation prompt
+- Fixed issue where changing the default org wouldn't update the target org for the notebook  
+
 ## 0.5.1
 
 - Fixed issue where SOQL results are not sorted by the order of the query
