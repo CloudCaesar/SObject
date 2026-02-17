@@ -247,13 +247,15 @@ export default class NotebookController {
             );
         }
         let output = '';
+        // Add logo at the top
+        output += '<div style="text-align: center; margin-bottom: 2rem;"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==" style="max-width: 200px; height: auto;" alt="Cloud CZR Logo"/></div>';
         if(pTotal != null && pTotal != 0) {
             output += '<div>Total Records: ' + pTotal + '</div>';
         }
         if(rows.length > 0) {
             output += '<table>' + rows.map((pArray, pIndex) => {
                 let tagName = pIndex == 0 ? 'th' : 'td';
-                let combinedRow = `<tr>` + pArray.map(pItem => `<${tagName} style="text-align:left">${pItem}</${tagName}>`).join('') + '</tr>';
+                let combinedRow = `<tr>` + pArray.map(pItem => `<${tagName}>${pItem}</${tagName}>`).join('') + '</tr>';
                 return combinedRow;
             }).join('') + '</table>';
         }
