@@ -1,12 +1,12 @@
 {
-  "name": "anonymous-apex-notebook",
-  "displayName": "Anonymous Apex Notebook",
-  "description": "Notebook support for executing anonymous apex scripts and SOQL queries",
+  "name": "SOObject",
+  "displayName": "SObject",
+  "description": "Salesforce development toolkit with Apex notebooks, SObject code generation, schema analysis, and permission auditing tools",
   "version": "0.6.0",
   "repository": {
-    "url": "https://github.com/jake-kirkman/vscode-ext-apex-notebook"
+    "url": "https://github.com/CloudCaesar/SObject"
   },
-  "icon": "media/package-icon.png",
+  "icon": "media/basil128x128.jpg",
   "engines": {
     "vscode": "^1.84.2"
   },
@@ -145,7 +145,6 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^14.2.13",
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
     "@types/node": "14.x",
@@ -161,19 +160,10 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "@angular/common": "^14.3.0",
-    "@angular/compiler": "^14.3.0",
-    "@angular/core": "^14.3.0",
-    "@angular/elements": "^14.3.0",
-    "@angular/forms": "^14.3.0",
-    "@angular/platform-browser": "^14.3.0",
-    "@angular/platform-browser-dynamic": "^14.3.0",
-    "@angular/router": "^14.3.0",
     "@salesforce/apex-node": "^3.0.2",
     "@salesforce/core": "^6.7.0",
     "rxjs": "^7.8.0",
     "semantic-ui-css": "^2.5.0",
-    "tslib": "^2.3.0",
-    "zone.js": "^0.11.4"
+    "tslib": "^2.3.0"
   }
 }
