@@ -8,6 +8,7 @@ import * as DataHandler from './handlers/dataHandler';
 import * as LogHandler from './handlers/logHandler';
 import * as SalesforceHandler from './handlers/salesforceHandler';
 import { HtmlPageBuilder } from './utils/HtmlPageBuilder';
+import { LoadingComponent } from './ViewComponents/loading.component';
 import { UserPermissionsComponent } from './ViewComponents/user-permissions.component';
 import { SchemaComponent } from './ViewComponents/schema.component';
 import { ObjectPermissionsComponent } from './ViewComponents/object-permissions.component';
@@ -190,6 +191,9 @@ export function activate(context: vscode.ExtensionContext) {
                     let connection = await SalesforceHandler.getSalesforceConnection();
                     let describe = await connection.describe(objectName);
 
+                    // Get org-wide defaults
+                    const orgWideDefaults = await schemaService.getOrgWideDefaults(objectName);
+
                     // Create webview panel
                     const panel = vscode.window.createWebviewPanel(
                         'sobjectSchema',
@@ -201,7 +205,8 @@ export function activate(context: vscode.ExtensionContext) {
                     // Render schema component and display HTML
                     const schemaComponent = new SchemaComponent({
                         objectName: objectName,
-                        fields: describe.fields
+                        fields: describe.fields,
+                        orgWideDefaults: orgWideDefaults
                     });
                     const contentHtml = schemaComponent.render();
                     const html = HtmlPageBuilder.build(contentHtml, `${objectName} Schema`);
@@ -253,6 +258,17 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.ViewColumn.One,
                         { enableScripts: true }
                     );
+
+                    // Helper to update webview with progress
+                    const updateProgress = (message: string) => {
+                        // Show loading message in webview
+                        const loadingComponent = new LoadingComponent(message);
+                        const loadingHtml = loadingComponent.render();
+                        panel.webview.html = HtmlPageBuilder.build(loadingHtml, 'Loading...');
+                    };
+
+                    // Show initial loading indicator
+                    updateProgress('Loading object permissions data...');
 
                     // Describe the object to get sharing model
                     let connection = await SalesforceHandler.getSalesforceConnection();
@@ -356,11 +372,13 @@ export function activate(context: vscode.ExtensionContext) {
                     // Helper to update webview with progress
                     const updateProgress = (message: string) => {
                         // Show loading message in webview
-                        panel.webview.html = HtmlPageBuilder.build('<div class="ui active loader">Loading...</div>', 'Loading...');
+                        const loadingComponent = new LoadingComponent(message);
+                        const loadingHtml = loadingComponent.render();
+                        panel.webview.html = HtmlPageBuilder.build(loadingHtml, 'Loading...');
                     };
 
                     // Show initial loading indicator
-                    updateProgress('Loading data...');
+                    updateProgress('Loading user permissions data...');
 
                     console.log(`[UserPermissions] Starting permission analysis for user ${userId} on object ${objectName}`);
 
@@ -516,6 +534,17 @@ let fields = describe.fields.filter((f: any) =>
                         vscode.ViewColumn.One,
                         { enableScripts: true }
                     );
+
+                    // Helper to update webview with progress
+                    const updateProgress = (message: string) => {
+                        // Show loading message in webview
+                        const loadingComponent = new LoadingComponent(message);
+                        const loadingHtml = loadingComponent.render();
+                        panel.webview.html = HtmlPageBuilder.build(loadingHtml, 'Loading...');
+                    };
+
+                    // Show initial loading indicator
+                    updateProgress('Loading field security data...');
 
                     console.log(`[FLS] Starting security analysis for field: ${fieldName} on object: ${objectName}`);
                     

@@ -63,23 +63,20 @@ export class FieldSecurityComponent {
             <div class="ui container">
                 <h2 class="ui header">Field Level Security</h2>
                 <div class="ui segment">
-                    <h3>Object: ${this.objectName}</h3>
-                    <h4>Field: ${this.fieldLabel} (${this.fieldName})</h4>
-                </div>
-
-                ${this.orgWideDefaults ? `
-                <div class="ui segment">
-                    <h3 class="ui header">Org-Wide Defaults</h3>
                     <div class="ui grid">
                         <div class="eight wide column">
-                            <strong>Default Internal Access:</strong> ${this.orgWideDefaults.InternalSharingModel || 'N/A'}
+                            <h3>Object: ${this.objectName}</h3>
+                            <h4>Field: ${this.fieldLabel} (${this.fieldName})</h4>
                         </div>
+                        ${this.orgWideDefaults ? `
                         <div class="eight wide column">
-                            <strong>Default External Access:</strong> ${this.orgWideDefaults.ExternalSharingModel || 'N/A'}
+                            <h4 class="ui header">Org-Wide Defaults</h4>
+                            <div><strong>Internal Access:</strong> ${this.orgWideDefaults.InternalSharingModel || 'N/A'}</div>
+                            <div><strong>External Access:</strong> ${this.orgWideDefaults.ExternalSharingModel || 'N/A'}</div>
                         </div>
+                        ` : ''}
                     </div>
                 </div>
-                ` : ''}
 
                 <div class="ui four item menu">
                     <a class="item active" data-section="all" onclick="showSection('all')">All</a>
@@ -112,7 +109,7 @@ export class FieldSecurityComponent {
                                 `).join('')}
                                 ${permissionSetGroupPermissions.map(perm => `
                                     <tr>
-                                        <td>${this.getPermissionSetGroupName(perm.parentId) || 'Unknown Permission Set Group'}</td>
+                                        <td>${this.getPSGNameForPermission(perm) || 'Unknown Permission Set Group'}</td>
                                         <td>Permission Set Group</td>
                                         <td>${this.renderPermissionStatus(perm.permissionsRead)}</td>
                                         <td>${this.renderPermissionStatus(perm.permissionsEdit)}</td>
@@ -161,23 +158,58 @@ export class FieldSecurityComponent {
                 <div id="psg-section" class="permissions-section" style="display: none;">
                     <div class="ui segment">
                         <h3 class="ui header">Permission Set Groups</h3>
-                        ${permissionSetGroupPermissions.length > 0 ?
-                        `<table class="ui table">
-                            <thead>
-                                <tr>
-                                    <th>Permission Set Group</th>
-                                    <th>Read</th>
-                                    <th>Edit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${permissionSetGroupRows}
-                            </tbody>
-                        </table>` :
-                        `<div class="ui info message">
-                            <div class="header">No Permission Set Group Field Permissions</div>
-                            <p>No field-level permissions found for permission set groups.</p>
-                        </div>`}
+                        ${this.permissionSetGroups.length > 0 ? `
+                        <div class="ui styled accordion" id="psg-accordion" style="width: 100%;">
+                            ${this.permissionSetGroups.map((group, index) => `
+                                <div class="title" onclick="toggleAccordion(${index})" style="width: 100%; cursor: pointer;">
+                                    <i class="dropdown icon"></i>
+                                    <strong>${group.name || 'Unknown Permission Set Group'}</strong>
+                                    <span class="ui small label" style="margin-left: 10px;">
+                                        ${group.members ? group.members.length : 0} permission sets
+                                    </span>
+                                </div>
+                                <div class="content" id="psg-content-${index}" style="padding: 1em 0; border-top: 1px solid rgba(34, 36, 38, 0.15); width: 100%;">
+                                    <div style="padding: 0 1em;">
+                                        ${group.members && group.members.length > 0 ? `
+                                        <div class="ui grid">
+                                            <div class="sixteen wide column">
+                                                <h4>Member Permission Sets</h4>
+                                                <table class="ui table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Permission Set</th>
+                                                            <th>Read</th>
+                                                            <th>Edit</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${group.members.map((member: any) => `
+                                                            <tr>
+                                                                <td>${member.name || 'Unknown Permission Set'}</td>
+                                                                <td>${this.renderPermissionStatus(member.read)}</td>
+                                                                <td>${this.renderPermissionStatus(member.edit)}</td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        ` : `
+                                        <div class="ui info message">
+                                            <div class="header">No Member Permission Sets</div>
+                                            <p>This permission set group has no member permission sets with field permissions.</p>
+                                        </div>
+                                        `}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : `
+                        <div class="ui info message">
+                            <div class="header">No Permission Set Groups</div>
+                            <p>No permission set groups found with field permissions for this field.</p>
+                        </div>
+                        `}
                     </div>
                 </div>
 
@@ -210,6 +242,24 @@ export class FieldSecurityComponent {
                         console.log('Initializing field security sections');
                         showSection('all');
                     })();
+
+                    function toggleAccordion(index) {
+                        const content = document.getElementById('psg-content-' + index);
+                        const title = content.previousElementSibling;
+                        const icon = title.querySelector('.dropdown.icon');
+
+                        if (content.style.display === 'block') {
+                            content.style.display = 'none';
+                            title.classList.remove('active');
+                            icon.classList.remove('up');
+                            icon.classList.add('down');
+                        } else {
+                            content.style.display = 'block';
+                            title.classList.add('active');
+                            icon.classList.remove('down');
+                            icon.classList.add('up');
+                        }
+                    }
 
                     function showSection(sectionName) {
                         console.log('Showing field security section:', sectionName);
@@ -260,5 +310,20 @@ export class FieldSecurityComponent {
     private getPermissionSetGroupName(psgId: string): string | undefined {
         const psg = this.permissionSetGroups.find((group: any) => group.id === psgId);
         return psg ? psg.name : undefined;
+    }
+
+    private getPSGNameForPermission(perm: any): string | undefined {
+        // For PSG permissions, try viaPSG first (for profile-based PSG permissions)
+        if (perm.viaPSG) {
+            return perm.viaPSG;
+        }
+        
+        // For direct PSG permissions, the source field contains the PSG name
+        if (perm.source && perm.source !== 'Unknown Permission Set Group') {
+            return perm.source;
+        }
+        
+        // Fallback: try to find PSG by ID (though this is unlikely to work for profile-based permissions)
+        return this.getPermissionSetGroupName(perm.parentId);
     }
 }

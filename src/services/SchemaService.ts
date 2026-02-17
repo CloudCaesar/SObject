@@ -14,4 +14,8 @@ export class SchemaService {
     async getQueryableSObjects() {
         return await this.queryService.getEntityDefinitionSelector().selectQueryableSObjects();
     }
+
+    async getOrgWideDefaults(objectName: string) {
+        return await this.queryService.getEntityDefinitionSelector().selectOrgWideDefaults(objectName);
+    }
 }

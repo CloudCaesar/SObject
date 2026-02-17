@@ -42,20 +42,6 @@ export class ObjectPermissionsComponent {
             </tr>
         `}).join('');
 
-        const permissionSetGroupRows = this.permissionSetGroups.map(psg => {
-            console.log('Processing permission set group:', psg);
-            return `
-            <tr>
-                <td>${psg.name || psg.label || psg.Parent?.Name || psg.Parent?.Label || 'Unknown'}</td>
-                <td>${this.renderPermissionStatus(psg.permissions?.Read || psg.PermissionsRead)}</td>
-                <td>${this.renderPermissionStatus(psg.permissions?.Create || psg.PermissionsCreate)}</td>
-                <td>${this.renderPermissionStatus(psg.permissions?.Edit || psg.PermissionsEdit)}</td>
-                <td>${this.renderPermissionStatus(psg.permissions?.Delete || psg.PermissionsDelete)}</td>
-                <td>${this.renderPermissionStatus(psg.permissions?.ViewAll || psg.PermissionsViewAllRecords)}</td>
-                <td>${this.renderPermissionStatus(psg.permissions?.ModifyAll || psg.PermissionsModifyAllRecords)}</td>
-            </tr>
-        `}).join('');
-
         const profileRows = this.profilePermissions.map(pp => {
             console.log('Processing profile permission:', pp);
             return `
@@ -176,25 +162,91 @@ export class ObjectPermissionsComponent {
                 </div>
 
                 <div id="psg-section" class="permissions-section" style="display: none;">
+                    ${this.permissionSetGroups.length > 0 ? `
                     <div class="ui segment">
                         <h3 class="ui header">Permission Set Groups</h3>
-                        <table class="ui table">
-                            <thead>
-                                <tr>
-                                    <th>Permission Set Group</th>
-                                    <th>Read</th>
-                                    <th>Create</th>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
-                                    <th>View All</th>
-                                    <th>Modify All</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${permissionSetGroupRows}
-                            </tbody>
-                        </table>
+                        <div class="ui styled accordion" id="psg-accordion" style="width: 100%;">
+                            ${this.permissionSetGroups.map((group, index) => `
+                                <div class="title" onclick="toggleAccordion(${index})" style="width: 100%; cursor: pointer;">
+                                    <i class="dropdown icon"></i>
+                                    <strong>${group.Parent?.Label || group.Parent?.Name || group.name || group.label || 'Unknown'}</strong>
+                                    <span class="ui small label" style="margin-left: 10px;">
+                                        ${group.memberPermissions ? group.memberPermissions.length : 0} permission sets
+                                    </span>
+                                </div>
+                                <div class="content" id="psg-content-${index}" style="padding: 1em 0; border-top: 1px solid rgba(34, 36, 38, 0.15); width: 100%;">
+                                    <div style="padding: 0 1em;">
+                                        <div class="ui grid">
+                                            <div class="sixteen wide column">
+                                                <h4>Group Permissions</h4>
+                                                <table class="ui table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Read</th>
+                                                            <th>Create</th>
+                                                            <th>Edit</th>
+                                                            <th>Delete</th>
+                                                            <th>View All</th>
+                                                            <th>Modify All</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>${this.renderPermissionStatus(group.PermissionsRead)}</td>
+                                                            <td>${this.renderPermissionStatus(group.PermissionsCreate)}</td>
+                                                            <td>${this.renderPermissionStatus(group.PermissionsEdit)}</td>
+                                                            <td>${this.renderPermissionStatus(group.PermissionsDelete)}</td>
+                                                            <td>${this.renderPermissionStatus(group.PermissionsViewAllRecords)}</td>
+                                                            <td>${this.renderPermissionStatus(group.PermissionsModifyAllRecords)}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        ${group.memberPermissions && group.memberPermissions.length > 0 ? `
+                                        <div class="ui grid">
+                                            <div class="sixteen wide column">
+                                                <h4>Member Permission Sets</h4>
+                                                <table class="ui table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Permission Set</th>
+                                                            <th>Read</th>
+                                                            <th>Create</th>
+                                                            <th>Edit</th>
+                                                            <th>Delete</th>
+                                                            <th>View All</th>
+                                                            <th>Modify All</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${group.memberPermissions.map((memberPs: any) => `
+                                                            <tr>
+                                                                <td>${memberPs.memberPermissionSetName || memberPs.Parent?.Name || memberPs.Parent?.Label || 'Unknown'}</td>
+                                                                <td>${this.renderPermissionStatus(memberPs.PermissionsRead)}</td>
+                                                                <td>${this.renderPermissionStatus(memberPs.PermissionsCreate)}</td>
+                                                                <td>${this.renderPermissionStatus(memberPs.PermissionsEdit)}</td>
+                                                                <td>${this.renderPermissionStatus(memberPs.PermissionsDelete)}</td>
+                                                                <td>${this.renderPermissionStatus(memberPs.PermissionsViewAllRecords)}</td>
+                                                                <td>${this.renderPermissionStatus(memberPs.PermissionsModifyAllRecords)}</td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
+                    ` : `
+                    <div class="ui info message">
+                        <div class="header">No Permission Set Groups</div>
+                        <p>No permission set groups found for this object.</p>
+                    </div>
+                    `}
                 </div>
 
                 <div id="profiles-section" class="permissions-section" style="display: none;">
@@ -259,6 +311,22 @@ export class ObjectPermissionsComponent {
                         console.log('Clicked item:', clickedItem);
                         if (clickedItem) {
                             clickedItem.classList.add('active');
+                        }
+                    }
+
+                    function toggleAccordion(index) {
+                        const content = document.getElementById('psg-content-' + index);
+                        const title = content.previousElementSibling;
+                        const icon = title.querySelector('.dropdown.icon');
+
+                        if (content.classList.contains('active')) {
+                            content.classList.remove('active');
+                            icon.classList.remove('up');
+                            icon.classList.add('down');
+                        } else {
+                            content.classList.add('active');
+                            icon.classList.remove('down');
+                            icon.classList.add('up');
                         }
                     }
                 </script>

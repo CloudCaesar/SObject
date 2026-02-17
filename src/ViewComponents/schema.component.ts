@@ -1,10 +1,12 @@
 export class SchemaComponent {
     private objectName: string;
     private fields: any[];
+    private orgWideDefaults: any;
 
-    constructor(props: { objectName: string; fields: any[] }) {
+    constructor(props: { objectName: string; fields: any[]; orgWideDefaults?: any }) {
         this.objectName = props.objectName;
         this.fields = props.fields || [];
+        this.orgWideDefaults = props.orgWideDefaults;
     }
 
     render(): string {
@@ -22,6 +24,20 @@ export class SchemaComponent {
         return `
             <div class="ui container">
                 <h2 class="ui header">Object Schema: ${this.objectName}</h2>
+
+                ${this.orgWideDefaults ? `
+                <div class="ui segment">
+                    <h3 class="ui header">Org-Wide Defaults</h3>
+                    <div class="ui grid">
+                        <div class="eight wide column">
+                            <strong>Default Internal Access:</strong> ${this.orgWideDefaults.InternalSharingModel || 'N/A'}
+                        </div>
+                        <div class="eight wide column">
+                            <strong>Default External Access:</strong> ${this.orgWideDefaults.ExternalSharingModel || 'N/A'}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
 
                 <div class="ui segment">
                     <table class="ui table">
