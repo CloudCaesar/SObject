@@ -10,7 +10,27 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--disable-restore-windows",
+				"--user-data-dir=${workspaceFolder}/.vscode/.extension-dev-profile",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--folder-uri",
+				"file:///Users/czr66/Workspace/CZRPartner"
+			],
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"preLaunchTask": "${defaultBuildTask}"
+		},
+		{
+			"name": "Run Extension (CZRPartner)",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--disable-restore-windows",
+				"--user-data-dir=${workspaceFolder}/.vscode/.extension-dev-profile",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--folder-uri",
+				"file:///Users/czr66/Workspace/CZRPartner"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"

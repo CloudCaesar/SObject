@@ -2,8 +2,6 @@
 
 A comprehensive VS Code extension for Salesforce development featuring Apex notebooks, SObject code generation, schema analysis, and permission auditing tools.
 
-![Demo](media/demo.gif)
-
 ## Features
 
 ### 🏃‍♂️ Apex Notebooks

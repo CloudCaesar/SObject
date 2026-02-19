@@ -2,7 +2,7 @@
   "name": "SOObject",
   "displayName": "SObject",
   "description": "Salesforce development toolkit with Apex notebooks, SObject code generation, schema analysis, and permission auditing tools",
-  "version": "0.6.0",
+  "version": "0.6.4",
   "repository": {
     "url": "https://github.com/CloudCaesar/SObject"
   },

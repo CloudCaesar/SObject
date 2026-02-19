@@ -39,10 +39,36 @@ export class HtmlPageBuilder {
             margin: 0;
             background-color: #f8f9fa;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #1f2937;
         }
         :host {
             display: block;
             width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            background: #ffffff;
+            font-size: 13px;
+        }
+        th,
+        td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+            word-break: break-word;
+        }
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+        tr:nth-child(even) td {
+            background: #fafafa;
+        }
+        .ui.message {
+            margin: 16px;
         }
     </style>
 </head>

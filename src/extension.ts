@@ -23,25 +23,15 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import ApexNotebookController from './notebook/apexNotebookController';
-import ApexNotebookSerializer from './notebook/apexNotebookSerializer';
 import * as CONSTANTS from './constants';
 import * as DataHandler from './handlers/dataHandler';
 import * as LogHandler from './handlers/logHandler';
-import * as SalesforceHandler from './handlers/salesforceHandler';
 import { HtmlPageBuilder } from './utils/HtmlPageBuilder';
 import { LoadingComponent } from './ViewComponents/loading.component';
 import { UserPermissionsComponent } from './ViewComponents/user-permissions.component';
 import { SchemaComponent } from './ViewComponents/schema.component';
 import { ObjectPermissionsComponent } from './ViewComponents/object-permissions.component';
 import { FieldSecurityComponent } from './ViewComponents/field-security.component';
-import { SObjectToApexService } from './services/SObjectToApexService';
-import { SObjectToApexChildParentService } from './services/SObjectToApexChildParentService';
-import { SObjectToApexParentChildService } from './services/SObjectToApexParentChildService';
-import { FieldSecurityService } from './services/FieldSecurityService';
-import { SchemaService } from './services/SchemaService';
-import { ObjectPermissionsService } from './services/ObjectPermissionsService';
-import { UserPermissionsService } from './services/UserPermissionsService';
 
 // Input validation functions for security
 export function isValidSalesforceId(id: string): boolean {
@@ -116,7 +106,7 @@ export { formatField };
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -125,12 +115,20 @@ export function activate(context: vscode.ExtensionContext) {
     DataHandler.initiate(context);
     LogHandler.initiate();
 
-    context.subscriptions.push(
-        vscode.workspace.registerNotebookSerializer(CONSTANTS.NOTEBOOK_TYPE, new ApexNotebookSerializer())
-    );
-    context.subscriptions.push(
-        new ApexNotebookController()
-    );
+    try {
+        const { default: ApexNotebookSerializer } = await import('./notebook/apexNotebookSerializer');
+        const { default: ApexNotebookController } = await import('./notebook/apexNotebookController');
+        context.subscriptions.push(
+            vscode.workspace.registerNotebookSerializer(CONSTANTS.NOTEBOOK_TYPE, new ApexNotebookSerializer())
+        );
+        context.subscriptions.push(
+            new ApexNotebookController()
+        );
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        LogHandler.error(`Notebook initialization failed: ${errorMessage}`);
+        vscode.window.showErrorMessage(`SObject notebook initialization failed: ${errorMessage}`);
+    }
 
     context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -152,6 +150,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand(
             CONSTANTS.COMMAND_NAME_SOBJECT_TO_APEX,
             async () => {
+                const { SObjectToApexService } = await import('./services/SObjectToApexService');
                 const service = new SObjectToApexService();
                 await service.execute();
             }
@@ -162,6 +161,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand(
             CONSTANTS.COMMAND_NAME_SOBJECT_TO_APEX_CHILD_PARENT,
             async () => {
+                const { SObjectToApexChildParentService } = await import('./services/SObjectToApexChildParentService');
                 const service = new SObjectToApexChildParentService();
                 await service.execute();
             }
@@ -172,6 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand(
             CONSTANTS.COMMAND_NAME_SOBJECT_TO_APEX_PARENT_CHILD,
             async () => {
+                const { SObjectToApexParentChildService } = await import('./services/SObjectToApexParentChildService');
                 const service = new SObjectToApexParentChildService();
                 await service.execute();
             }
@@ -183,6 +184,8 @@ export function activate(context: vscode.ExtensionContext) {
             CONSTANTS.COMMAND_NAME_SOBJECT_SCHEMA,
             async () => {
                 try {
+                    const { SchemaService } = await import('./services/SchemaService');
+                    const SalesforceHandler = await import('./handlers/salesforceHandler');
                     const schemaService = new SchemaService();
                     await schemaService.initialize();
 
@@ -250,6 +253,8 @@ export function activate(context: vscode.ExtensionContext) {
             CONSTANTS.COMMAND_NAME_SOBJECT_PERMISSIONS,
             async () => {
                 try {
+                    const { ObjectPermissionsService } = await import('./services/ObjectPermissionsService');
+                    const SalesforceHandler = await import('./handlers/salesforceHandler');
                     const permissionsService = new ObjectPermissionsService();
                     await permissionsService.initialize();
 
@@ -332,6 +337,8 @@ export function activate(context: vscode.ExtensionContext) {
             CONSTANTS.COMMAND_NAME_SOBJECT_USER_PERMISSIONS,
             async () => {
                 try {
+                    const { UserPermissionsService } = await import('./services/UserPermissionsService');
+                    const SalesforceHandler = await import('./handlers/salesforceHandler');
                     console.log('[UserPermissions] Command started');
                     
                     const userPermissionsService = new UserPermissionsService();
@@ -484,6 +491,8 @@ export function activate(context: vscode.ExtensionContext) {
             CONSTANTS.COMMAND_NAME_SOBJECT_FIELD_SECURITY,
             async () => {
                 try {
+                    const { FieldSecurityService } = await import('./services/FieldSecurityService');
+                    const SalesforceHandler = await import('./handlers/salesforceHandler');
                     const fieldSecurityService = new FieldSecurityService();
                     await fieldSecurityService.initialize();
                     
